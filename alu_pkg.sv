@@ -1,6 +1,7 @@
 package alu_pkg;
   `include "defines.sv"
   `include "alu_transaction.sv"
+  `include "alu_output_cov.sv"
   `include "alu_generator.sv"
   `include "alu_driver.sv"
   `include "alu_monitor.sv"
