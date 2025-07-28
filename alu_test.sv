@@ -20,7 +20,7 @@ class alu_test;
         //Task which builds the object for environment handlie and calls the build and start methods of the environment
         task run();
                 env=new(drv_vif,mon_vif,ref_vif);
-                env.build;
-                env.start;
+                env.build();
+                env.start();
         endtask
 endclass
