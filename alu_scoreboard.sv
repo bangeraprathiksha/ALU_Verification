@@ -1,61 +1,70 @@
 `include "defines.sv"
+
+
 class alu_scoreboard;
-        //PROPERTIES
-        //alu transaction handle
-        alu_transaction ref2sb_trans, mon2sb_trans;
-        //Mailbox for from reference model to scoreboard connection
-        mailbox #(alu_transaction) mbx_rs;
-        //Mailbox for from monitor to scoreboard connection
-        mailbox #(alu_transaction) mbx_ms;
 
+  // Properties
+  mailbox #(alu_transaction) mbx_rs; // from reference model
+  mailbox #(alu_transaction) mbx_ms; // from monitor
 
-        //Variables to indicate no:of matches and mismatches
-        int MATCH,MISMATCH;
+  int match_count = 0;
+  int mismatch_count = 0;
 
-        //METHODS
-        //Explicitly overriding the constructor to make mailbox connection from monitor
-        //to scoreboard, to make mailbox connection from reference model to scoreboard
-        function new(mailbox #(alu_transaction) mbx_rs,
-                     mailbox #(alu_transaction) mbx_ms);
-                this.mbx_rs=mbx_rs;
-                this.mbx_ms=mbx_ms;
-        endfunction
+  // Constructor
+  function new(mailbox #(alu_transaction) mbx_rs,
+               mailbox #(alu_transaction) mbx_ms);
+    this.mbx_rs = mbx_rs;
+    this.mbx_ms = mbx_ms;
+  endfunction
 
-        //Task which collects data_out from reference model and scoreboard
-        //and sotres them in their respective memories
-        task start();
-                for(int i=0;i<`no_of_trans;i++)
-                begin
-                        ref2sb_trans=new();
-                        mon2sb_trans=new();
-                        // fork
-                        begin
-                        	//getting the reference model transaction from mailbox
-                                mbx_rs.get(ref2sb_trans);
-                        end
-                        begin
-                        //getting the monitor transaction from mailbox
-                                mbx_ms.get(mon2sb_trans);
-                        end
-                        compare_report();
-                        //   join
-                end
-        endtask
+  // Compare logic
+  function bit compare(alu_transaction mon, alu_transaction ref_txn);
+    return (mon.RES   == ref_txn.RES   &&
+            mon.COUT  == ref_txn.COUT  &&
+            mon.OFLOW == ref_txn.OFLOW &&
+            mon.ERR   == ref_txn.ERR   &&
+            mon.E     == ref_txn.E     &&
+            mon.G     == ref_txn.G     &&
+            mon.L     == ref_txn.L);
+  endfunction
 
-        //Task which compares the memories and generates the report
-        task compare_report();
-                if((ref2sb_trans.RES == mon2sb_trans.RES) && (ref2sb_trans.COUT == mon2sb_trans.COUT) && (ref2sb_trans.OFLOW == mon2sb_trans.OFLOW) && (ref2sb_trans.E == mon2sb_trans.E) && (ref2sb_trans.G == mon2sb_trans.G) && (ref2sb_trans.L == mon2sb_trans.L)&& (ref2sb_trans.ERR == mon2sb_trans.ERR))
-                begin
-                        $display("SCOREBOARD REF RES[mon]=%0d, RES[ref]=%0d COUT[mon]=%0d, COUT[ref]=%0d OFLOW[mon]=%0d, OFLOW[ref]=%0d E[mon]=%0d, E[ref]=%0d G[mon]=%0d, G[ref]=%0d L[mon]=%0d, L[ref]=%0d ERR[mon]=%0d, ERR[ref]=%0d",mon2sb_trans.RES,ref2sb_trans.RES,mon2sb_trans.COUT,ref2sb_trans.COUT,mon2sb_trans.OFLOW,ref2sb_trans.OFLOW, mon2sb_trans.E,ref2sb_trans.E,mon2sb_trans.G,ref2sb_trans.G,mon2sb_trans.L,ref2sb_trans.L,mon2sb_trans.ERR,ref2sb_trans.ERR,$time);
-                        MATCH++;
-                        $display("DATA MATCH SUCCESSFUL MATCH=%d",MATCH);
-                end
-                else
-                begin
+  // Main scoreboard thread: waits on both mailboxes and matches
+  task start();
+    alu_transaction mon_data, ref_data;
+    for (int i = 0; i < `no_of_trans; i++) begin
+      mbx_rs.get(ref_data);
+      mbx_ms.get(mon_data);
 
-                        MISMATCH++;
-                        $display("DATA MATCH FAILED MISMATCH=%d",MISMATCH);
-                end
+      if (compare(mon_data, ref_data)) begin
+        $display("SCOREBOARD MATCH[%0t]: SUCCESS", $time);
+        $display("  RES[mon]=%0d, RES[ref]=%0d", mon_data.RES, ref_data.RES);
+        $display("  COUT[mon]=%0d, COUT[ref]=%0d", mon_data.COUT, ref_data.COUT);
+        $display("  OFLOW[mon]=%0d, OFLOW[ref]=%0d", mon_data.OFLOW, ref_data.OFLOW);
+        $display("  ERR[mon]=%0d, ERR[ref]=%0d", mon_data.ERR, ref_data.ERR);
+        $display("  E[mon]=%0d, E[ref]=%0d", mon_data.E, ref_data.E);
+        $display("  G[mon]=%0d, G[ref]=%0d", mon_data.G, ref_data.G);
+        $display("  L[mon]=%0d, L[ref]=%0d", mon_data.L, ref_data.L);
+        match_count++;
+      end else begin
+        $display("SCOREBOARD MISMATCH[%0t]: FAILURE", $time);
+        $display("  RES[mon]=%0d, RES[ref]=%0d", mon_data.RES, ref_data.RES);
+        $display("  COUT[mon]=%0d, COUT[ref]=%0d", mon_data.COUT, ref_data.COUT);
+        $display("  OFLOW[mon]=%0d, OFLOW[ref]=%0d", mon_data.OFLOW, ref_data.OFLOW);
+        $display("  ERR[mon]=%0d, ERR[ref]=%0d", mon_data.ERR, ref_data.ERR);
+        $display("  E[mon]=%0d, E[ref]=%0d", mon_data.E, ref_data.E);
+        $display("  G[mon]=%0d, G[ref]=%0d", mon_data.G, ref_data.G);
+        $display("  L[mon]=%0d, L[ref]=%0d", mon_data.L, ref_data.L);
+        mismatch_count++;
+      end
+    end
   endtask
+
+  // Final report
+  task compare_report();
+    $display("\n========== SCOREBOARD REPORT ==========");
+    $display("Total Matches   = %0d", match_count);
+    $display("Total Mismatches= %0d", mismatch_count);
+    $display("========================================\n");
+  endtask
+
 endclass
-           
