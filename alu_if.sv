@@ -1,5 +1,5 @@
-`include "defines.sv"
-`include "alu_pkg.sv"
+`include"defines.sv"
+
 import alu_pkg::*;
 interface alu_if(input bit CLK, RST);
         //Declaring signals with width
@@ -11,13 +11,21 @@ interface alu_if(input bit CLK, RST);
         logic[`width+1:0] RES;
         logic COUT,OFLOW,E,G,L,ERR;
 
-        //Clocking block for driver
-        cloking drv_cb @(posedge CLK);
-  		default input #0 output #0;
-  		output OPA, OPB, CMD, MODE, CIN, CE, INP_VALID;
-  		input RST; 
-	endclocking
+        clocking drv_cb @(posedge CLK);
+                default input #0 output #0;
+                input output OPA, OPB, CE, CIN, MODE, INP_VALID, CMD;
+                input RST;
+        endclocking
 
+
+        /*Clocking block for driver
+        clocking drv_cb@(posedge CLK);
+                //Specifying the values for input and output skews
+        default input #0 output #0;
+        //Declaring signals without widths, but specifying the direction
+        output OPA,OPB,CE,CIN,MODE,INP_VALID,CMD;
+        input RST;
+        endclocking*/
 
         //Clocking block for monitor
         clocking mon_cb@(posedge CLK);
@@ -27,6 +35,7 @@ interface alu_if(input bit CLK, RST);
          input RES,COUT,OFLOW,E,G,L,ERR;
          endclocking
 
+
         //clocking block for reference model
         clocking ref_cb@(posedge CLK);
         //Specifying the values for input and output skews
@@ -34,7 +43,8 @@ interface alu_if(input bit CLK, RST);
         endclocking
 
         //modports for driver, monitor and reference model
-        modport DRV(clocking drv_cb);
-        modport MON(clocking mon_cb);
-        modport REF_SB(clocking ref_cb);
+        modport DRV(clocking drv_cb, input CLK, RST);
+	modport MON(clocking mon_cb, input CLK, RST,input CE, INP_VALID);
+        modport REF_SB(clocking ref_cb, input CLK, RST);
+
 endinterface
