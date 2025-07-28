@@ -24,9 +24,10 @@ class alu_transaction;
                 copy.OPA = this.OPA;
                 copy.OPB = this.OPB;
                 copy.MODE = this.MODE;
+                copy.CE = this.CE;
                 copy.CIN = this.CIN;
                 copy.INP_VALID = this.INP_VALID;
                 copy.CMD = this.CMD;
                 return copy;
         endfunction
-endclasss
+endclass
