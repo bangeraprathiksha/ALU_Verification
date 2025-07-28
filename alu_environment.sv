@@ -30,7 +30,7 @@ class alu_environment;
                         virtual alu_if ref_vif);
                 this.drv_vif=drv_vif;
                 this.mon_vif=mon_vif;
-               this.ref_vif=ref_vif;
+                this.ref_vif=ref_vif;
         endfunction
         //Task which creates for all the mailoxes and components
         task build();
@@ -41,11 +41,14 @@ class alu_environment;
         mbx_rs=new();
         mbx_ms=new();
         //Creating objects for componets and passing the arguments in the function new()i,e the constructor
+
+
         gen=new(mbx_gd);
         drv=new(mbx_gd,mbx_dr,drv_vif);
         mon=new(mbx_ms,mon_vif);
         ref_sb=new(mbx_dr,mbx_rs,ref_vif);
         scb=new(mbx_rs,mbx_ms);
+
         end
         endtask
 
@@ -61,4 +64,6 @@ class alu_environment;
         join
         scb.compare_report();
         endtask
+
+
 endclass
