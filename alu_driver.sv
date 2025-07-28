@@ -1,14 +1,4 @@
-
-
-`include "defines.sv"
-class alu_driver;
-        //PROPERTIES
-        //alu transaction class handle
-        alu_transaction drv_trans;
-        //Mailbox for generator to driver connection
-        mailbox #(alu_transaction) mbx_gd;
-        //Mailbox for driver to reference model connection
-        mailbox #(alu_transaction) mbx_dr;
+     mailbox #(alu_transaction) mbx_dr;
         //Virtual interface with driver modport and it's instance
         virtual alu_if.DRV vif;
 
@@ -94,11 +84,14 @@ class alu_driver;
 
         //Task to drive the stimuli to the interface
         task start();
-                @(negedge vif.drv_cb.RST);//////
+         $display(" dRIVER : [ %0t ] ", $time);
+        repeat(1) @(vif.drv_cb);
+            $display(" dRIVER : [ %0t ] ", $time);
                 for(int i=0; i<`no_of_trans;i++) begin
                         drv_trans = new();
                         //getting transaction from generator
                         mbx_gd.get(drv_trans);
+                        $display("%0t got",$time);
                         /*if(vif.drv_cb.RST == 0) begin
 
                                         vif.drv_cb.OPA <= 0;
@@ -110,10 +103,10 @@ class alu_driver;
                                         vif.drv_cb.CIN <= 0;
                                         mbx_dr.put(drv_trans);
 
-                                        $display("DRIVER DRIVING DATA TO THE INTERFACE OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN,$time);
+                                        $display("Time[%0t ]DRIVER DRIVING DATA TO THE INTERFACE OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
                                 end*/
-                        if (((drv_trans.INP_VALID == 2'b01 || drv_trans.INP_VALID == 2'b10) && drv_trans.CE && (drv_trans.MODE && drv_trans.CMD inside {0, 1, 2, 3, 8, 9, 10})) || ((drv_trans.INP_VALID == 2'b01 || drv_trans.INP_VALID == 2'b10) && (!drv_trans.MODE && drv_trans.CMD inside {0, 1, 2, 3, 4, 5, 12, 13}))) begin                      @(vif.drv_cb);
-                                        mbx_dr.put(drv_trans);
+                        if (((drv_trans.INP_VALID == 2'b01 || drv_trans.INP_VALID == 2'b10) && drv_trans.CE && (drv_trans.MODE && drv_trans.CMD inside {0, 1, 2, 3, 8, 9, 10})) || ((drv_trans.INP_VALID == 2'b01 || drv_trans.INP_VALID == 2'b10) && (!drv_trans.MODE && drv_trans.CMD inside {0, 1, 2, 3, 4, 5, 12, 13}))) begin
+
 
                                         cmd_fixed <= drv_trans.CMD;
                                         ce_fixed  <= drv_trans.CE;
@@ -139,26 +132,27 @@ class alu_driver;
                                                 else
                                                         $display("Randomization Failed!!");
                                         end
-                                         $display("DRIVER DRIVING DATA TO THE INTERFACE OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN,$time);
+                                         $display("time[%0t] DRIVER DRIVING DATA TO THE INTERFACE OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
                                          mbx_dr.put(drv_trans);
                                         $display("INPUT FUNCTIONAL COVERAGE = %0d",drv_cg.get_coverage());
                         end
                         else  begin
-                                        @(vif.drv_cb);
+
                                         vif.drv_cb.OPA <= drv_trans.OPA;
                                         vif.drv_cb.OPB <= drv_trans.OPB;
                                         vif.drv_cb.CMD <= drv_trans.CMD;
                                         vif.drv_cb.INP_VALID <= drv_trans.INP_VALID;
-                                       vif.drv_cb.MODE <= drv_trans.MODE;
+                                        vif.drv_cb.MODE <= drv_trans.MODE;
                                         vif.drv_cb.CE <= drv_trans.CE;
                                         vif.drv_cb.CIN <= drv_trans.CIN;
-                                        //repeat(1) @(vif.drv_cb);
-                                        $display("DRIVER WRITE OPERATION DRIVING DATA TO THE INTERFACE  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN,$time);
+
+                                        $display("time[%0t] DRIVER WRITE OPERATION DRIVING DATA TO THE INTERFACE  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
                                         //Putting the randmized inputs to maibox
                                         mbx_dr.put(drv_trans);
-                                        $display("INPUT FUNCTIONAL COVERAGE = %0d",drv_cg.get_coverage());
+                                        //$display("INPUT FUNCTIONAL COVERAGE = %0d",drv_cg.get_coverage());
                                 end
                         drv_cg.sample();
+                         $display("INPUT FUNCTIONAL COVERAGE = %0d",drv_cg.get_coverage());
                 end
         endtask
 endclass
