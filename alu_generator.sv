@@ -16,14 +16,15 @@ class alu_generator;
         endfunction
 
         //Task to generate the random stimuli
-          task start();
-                for(int i=0; i<`no_of_trans;i++)
-                begin
-                        //Randomizing the inputs
-                        blueprint.randomize();
-                        //Putting the randomized inputs to mailbox
-                        mbx_gd.put(blueprint.copy());
-                        $display("GENERATOR Randomized transaction OPA= %0d, OPB=%0d, INP_VALID=%0b, CMD=%0b, MODE=%0b, CE=%0b, CIN=%0d",blueprint.OPA,blueprint.OPB,blueprint.INP_VALID,blueprint.CMD,blueprint.MODE,blueprint.CE,blueprint.CIN);
-                end
-        endtask
+        task start();
+         for (int i = 0; i < `no_of_trans; i++) begin
+    if (!blueprint.randomize()) begin
+      $display("ERROR: Randomization failed at i=%0d", i);
+    end
+    mbx_gd.put(blueprint.copy());
+
+    $display("GENERATOR: txn[%0d] OPA=%0d, OPB=%0d, INP_VALID=%b, CMD=%0d, MODE=%0b, CE=%0b, CIN=%0b",i, blueprint.OPA, blueprint.OPB, blueprint.INP_VALID, blueprint.CMD, blueprint.MODE, blueprint.CE, blueprint.CIN);
+  end
+endtask
+
 endclass
