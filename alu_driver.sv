@@ -1,4 +1,12 @@
-     mailbox #(alu_transaction) mbx_dr;
+`include "defines.sv"
+class alu_driver;
+        //PROPERTIES
+        //alu transaction class handle
+        alu_transaction drv_trans;
+        //Mailbox for generator to driver connection
+        mailbox #(alu_transaction) mbx_gd;
+        //Mailbox for driver to reference model connection
+        mailbox #(alu_transaction) mbx_dr;
         //Virtual interface with driver modport and it's instance
         virtual alu_if.DRV vif;
 
@@ -6,6 +14,7 @@
         bit [3:0] cmd_fixed;
         bit ce_fixed;
         bit mode_fixed;
+
 
         //FUNCTIONAL COVERAGE for inputs
         covergroup drv_cg;
@@ -84,27 +93,20 @@
 
         //Task to drive the stimuli to the interface
         task start();
-         $display(" dRIVER : [ %0t ] ", $time);
-        repeat(1) @(vif.drv_cb);
-            $display(" dRIVER : [ %0t ] ", $time);
+
+                //@(negedge vif.RST);             // Wait for reset to go low
+                repeat(2)@(vif.drv_cb);            // Wait 1 clock after reset ends
+                $display("DRIVER: started %0t", $time);
+
+
                 for(int i=0; i<`no_of_trans;i++) begin
                         drv_trans = new();
                         //getting transaction from generator
+
                         mbx_gd.get(drv_trans);
-                        $display("%0t got",$time);
-                        /*if(vif.drv_cb.RST == 0) begin
+                        $display("time[%0t] DRIVER GOT DATA OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
+                        $display("RST=%0b ",vif.RST);
 
-                                        vif.drv_cb.OPA <= 0;
-                                        vif.drv_cb.OPB <= 0;
-                                        vif.drv_cb.CMD <= 0;
-                                        vif.drv_cb.INP_VALID <=0;
-                                        vif.drv_cb.MODE <= 0;
-                                        vif.drv_cb.CE <= 0;
-                                        vif.drv_cb.CIN <= 0;
-                                        mbx_dr.put(drv_trans);
-
-                                        $display("Time[%0t ]DRIVER DRIVING DATA TO THE INTERFACE OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
-                                end*/
                         if (((drv_trans.INP_VALID == 2'b01 || drv_trans.INP_VALID == 2'b10) && drv_trans.CE && (drv_trans.MODE && drv_trans.CMD inside {0, 1, 2, 3, 8, 9, 10})) || ((drv_trans.INP_VALID == 2'b01 || drv_trans.INP_VALID == 2'b10) && (!drv_trans.MODE && drv_trans.CMD inside {0, 1, 2, 3, 4, 5, 12, 13}))) begin
 
 
@@ -116,25 +118,32 @@
                                         for (int j = 0; j < 16; j++)
                                         begin
                                                 @(vif.drv_cb);
-                                                if(drv_trans.randomize() with {CMD == cmd_fixed; MODE == mode_fixed; CE == ce_fixed; })begin
-                                                        vif.drv_cb.OPA       <= drv_trans.OPA;
-                                                        vif.drv_cb.OPB       <= drv_trans.OPB;
-                                                        vif.drv_cb.CMD       <= drv_trans.CMD;
-                                                        vif.drv_cb.INP_VALID <= drv_trans.INP_VALID;
-                                                        vif.drv_cb.MODE      <= drv_trans.MODE;
-                                                        vif.drv_cb.CE        <= drv_trans.CE;
-                                                        vif.drv_cb.CIN       <= drv_trans.CIN;
+                                                $display("time [%0t], indide loop j=%0d",$time,j);
 
-                                                        mbx_dr.put(drv_trans);
-                                                        if (drv_trans.INP_VALID == 2'b11) begin                                                                                                                         break;
+                                                if (drv_trans.randomize() with { CMD == cmd_fixed; MODE == mode_fixed; CE == ce_fixed; }) begin
+                                                                vif.drv_cb.OPA       <= drv_trans.OPA;
+                                                                vif.drv_cb.OPB       <= drv_trans.OPB;
+                                                                vif.drv_cb.CMD       <= drv_trans.CMD;
+                                                                vif.drv_cb.INP_VALID <= drv_trans.INP_VALID;
+                                                                vif.drv_cb.MODE      <= drv_trans.MODE;
+                                                                vif.drv_cb.CE        <= drv_trans.CE;
+                                                                vif.drv_cb.CIN       <= drv_trans.CIN;
+                                                                 $display("time[%0t] DRIVER RANDOMIZING OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
+
+                                                        if(drv_trans.INP_VALID==2'b11)begin
+                                                                mbx_dr.put(drv_trans);
+
+                                                                $display("time[%0t] DRIVER DRIVING DATA TO REFERENCE AND MONITOR OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
+                                                                break;
                                                         end
                                                 end
+
+
                                                 else
                                                         $display("Randomization Failed!!");
+
                                         end
-                                         $display("time[%0t] DRIVER DRIVING DATA TO THE INTERFACE OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
-                                         mbx_dr.put(drv_trans);
-                                        $display("INPUT FUNCTIONAL COVERAGE = %0d",drv_cg.get_coverage());
+
                         end
                         else  begin
 
@@ -146,13 +155,14 @@
                                         vif.drv_cb.CE <= drv_trans.CE;
                                         vif.drv_cb.CIN <= drv_trans.CIN;
 
-                                        $display("time[%0t] DRIVER WRITE OPERATION DRIVING DATA TO THE INTERFACE  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
                                         //Putting the randmized inputs to maibox
                                         mbx_dr.put(drv_trans);
-                                        //$display("INPUT FUNCTIONAL COVERAGE = %0d",drv_cg.get_coverage());
-                                end
+                                        repeat(1)@(vif.drv_cb);
+                                        $display("time[%0t] DRIVER DRIVING DATA TO REFERENCE AND MONITOR  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
+                        end
                         drv_cg.sample();
                          $display("INPUT FUNCTIONAL COVERAGE = %0d",drv_cg.get_coverage());
                 end
+                $display("driver task done");
         endtask
 endclass
