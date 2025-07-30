@@ -18,12 +18,12 @@ class alu_generator;
         //Task to generate the random stimuli
         task start();
          for (int i = 0; i < `no_of_trans; i++) begin
-    if (!blueprint.randomize()) begin
-      $display("ERROR: Randomization failed at i=%0d", i);
-    end
+      blueprint.randomize();
+
+
     mbx_gd.put(blueprint.copy());
 
-    $display("GENERATOR: txn[%0d] OPA=%0d, OPB=%0d, INP_VALID=%b, CMD=%0d, MODE=%0b, CE=%0b, CIN=%0b",i, blueprint.OPA, blueprint.OPB, blueprint.INP_VALID, blueprint.CMD, blueprint.MODE, blueprint.CE, blueprint.CIN);
+    $display("[%0t],GENERATOR: txn[%0d] OPA=%0d, OPB=%0d, INP_VALID=%b, CMD=%0d, MODE=%0b, CE=%0b, CIN=%0b",$time,i, blueprint.OPA, blueprint.OPB, blueprint.INP_VALID, blueprint.CMD, blueprint.MODE, blueprint.CE, blueprint.CIN);
   end
 endtask
 
