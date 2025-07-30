@@ -104,7 +104,7 @@ class alu_driver;
                         //getting transaction from generator
 
                         mbx_gd.get(drv_trans);
-                        $display("time[%0t] DRIVER GOT DATA OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
+                        //$display("time[%0t] DRIVER GOT DATA OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
                         $display("RST=%0b ",vif.RST);
 
                         if (((drv_trans.INP_VALID == 2'b01 || drv_trans.INP_VALID == 2'b10) && drv_trans.CE && (drv_trans.MODE && drv_trans.CMD inside {0, 1, 2, 3, 8, 9, 10})) || ((drv_trans.INP_VALID == 2'b01 || drv_trans.INP_VALID == 2'b10) && (!drv_trans.MODE && drv_trans.CMD inside {0, 1, 2, 3, 4, 5, 12, 13}))) begin
@@ -129,11 +129,14 @@ class alu_driver;
                                                                 vif.drv_cb.CE        <= drv_trans.CE;
                                                                 vif.drv_cb.CIN       <= drv_trans.CIN;
                                                                  $display("time[%0t] DRIVER RANDOMIZING OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
+                                                                                                                mbx_dr.put(drv_trans);
+                                                 $display("time[%0t] DRIVER DRIVING DATA TO REFERENCE AND MONITOR  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
 
                                                         if(drv_trans.INP_VALID==2'b11)begin
-                                                                mbx_dr.put(drv_trans);
+                                                                                                                mbx_dr.put(drv_trans);
+                                                 //$display("time[%0t] DRIVER DRIVING DATA TO REFERENCE AND MONITOR  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
 
-                                                                $display("time[%0t] DRIVER DRIVING DATA TO REFERENCE AND MONITOR OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
+                                                                //$display("time[%0t] INP_VALID=11 achieved  DRIVER DRIVING DATA TO REFERENCE AND MONITOR OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
                                                                 break;
                                                         end
                                                 end
@@ -142,6 +145,8 @@ class alu_driver;
                                                 else
                                                         $display("Randomization Failed!!");
 
+                                                /*mbx_dr.put(drv_trans);
+                                                 //$display("time[%0t] DRIVER DRIVING DATA TO REFERENCE AND MONITOR  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);*/
                                         end
 
                         end
@@ -158,7 +163,7 @@ class alu_driver;
                                         //Putting the randmized inputs to maibox
                                         mbx_dr.put(drv_trans);
                                         repeat(1)@(vif.drv_cb);
-                                        $display("time[%0t] DRIVER DRIVING DATA TO REFERENCE AND MONITOR  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
+                                        //$display("time[%0t] DRIVER DRIVING DATA TO REFERENCE AND MONITOR  OPA=%0d,OPB=%0d,INP_VALID=%0d,CMD=%0d,MODE=%0d,CE=%0b,CIN=%0b",$time,vif.drv_cb.OPA,vif.drv_cb.OPB,vif.drv_cb.INP_VALID,vif.drv_cb.CMD,vif.drv_cb.MODE,vif.drv_cb.CE,vif.drv_cb.CIN);
                         end
                         drv_cg.sample();
                          $display("INPUT FUNCTIONAL COVERAGE = %0d",drv_cg.get_coverage());
