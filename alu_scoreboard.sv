@@ -32,8 +32,10 @@ class alu_scoreboard;
   task start();
     alu_transaction mon_data, ref_data;
     for (int i = 0; i < `no_of_trans; i++) begin
-      mbx_rs.get(ref_data);
-      mbx_ms.get(mon_data);
+
+                mbx_rs.get(ref_data);
+                mbx_ms.get(mon_data);
+
 
       if (compare(mon_data, ref_data)) begin
         $display("SCOREBOARD MATCH[%0t]: SUCCESS", $time);
@@ -66,5 +68,5 @@ class alu_scoreboard;
     $display("Total Mismatches= %0d", mismatch_count);
     $display("========================================\n");
   endtask
-
 endclass
+                                                 
