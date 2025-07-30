@@ -13,6 +13,17 @@ class alu_reference_model;
         bit got_input;
         alu_transaction temp_trans;
         logic [2:0] amount;
+/*      int valid_count=0;
+        static int valid_txns = 0;
+
+
+
+
+static function int get_valid_txns();
+        return valid_txns;
+endfunction*/
+
+
 //======================================================================
         //METHODS
         //Explicitly overriding the constructor to make the mailbox connection from diver to reference model
@@ -26,7 +37,7 @@ class alu_reference_model;
                 this.vif = vif;
         endfunction
 
-                        function void reset_outputs();
+                        /*function void reset_outputs();
                                 ref_trans.RES   = 0;
                                 ref_trans.COUT  = 0;
                                 ref_trans.OFLOW = 0;
@@ -34,7 +45,7 @@ class alu_reference_model;
                                 ref_trans.G     = 0;
                                 ref_trans.L     = 0;
                                 ref_trans.ERR   = 0;
-                        endfunction
+                        endfunction*/
 
         //task which mimics the functionality of the ALU
         task start();
@@ -50,14 +61,30 @@ class alu_reference_model;
 
 //=========================================================================================================================
                         if(vif.RST ) begin  // or vif.ref_cb.RST if declared in ref_cb
-                                reset_outputs();
+                                //reset_outputs();
+
+
+                                ref_trans.RES   = 0;
+                                ref_trans.COUT  = 0;
+                                ref_trans.OFLOW = 0;
+                                ref_trans.E     = 0;
+                                ref_trans.G     = 0;
+                                ref_trans.L     = 0;
+                                ref_trans.ERR   = 0;
                                 continue;
                         end
 
                 else if(ref_trans.CE)begin
 
                         if(ref_trans.INP_VALID == 2'b00)begin
-                                reset_outputs();
+                                //reset_outputs();
+                                ref_trans.RES   = 0;
+                                ref_trans.COUT  = 0;
+                                ref_trans.OFLOW = 0;
+                                ref_trans.E     = 0;
+                                ref_trans.G     = 0;
+                                ref_trans.L     = 0;
+                                ref_trans.ERR   = 0;
                         end
 
 
@@ -76,7 +103,15 @@ class alu_reference_model;
                                                 ref_trans.RES = ref_trans.OPA - 1;
                                                 end
 
-                                                default: reset_outputs();
+                                                default: begin //reset_outputs();
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+                                                end
                                         endcase
                                         end
                                         1'b0: begin // Logical
@@ -84,7 +119,16 @@ class alu_reference_model;
                                                 4'b0110: ref_trans.RES = {1'b0,~(ref_trans.OPA)};//NOT_A
                                                 4'b1000: ref_trans.RES = {1'b0,ref_trans.OPA>>1};//SHR1_A
                                                 4'b1001: ref_trans.RES = {1'b0,ref_trans.OPA << 1};//SHL1_A
-                                                default: reset_outputs();
+                                                //default: reset_outputs();
+                                                default: begin //reset_outputs();
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+                                                end
                                         endcase
                                         end
                                 endcase
@@ -106,7 +150,16 @@ class alu_reference_model;
                                                 ref_trans.RES = ref_trans.OPB - 1;
                                                 end
 
-                                                default: reset_outputs();
+                                                //default: reset_outputs();
+                                                default: begin //reset_outputs();
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+                                                end
 
                                         endcase
                                         end
@@ -117,7 +170,16 @@ class alu_reference_model;
                                                 4'b0111: ref_trans.RES = {1'b0,~(ref_trans.OPB)};//NOT_B
                                                 4'b1010: ref_trans.RES = {1'b0,ref_trans.OPB>>1};//SHR1_B
                                                 4'b1011: ref_trans.RES = {1'b0,ref_trans.OPB << 1};//SHL1_B
-                                                default: reset_outputs();
+                                                //default: reset_outputs();
+                                                default: begin //reset_outputs();
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+                                                end
 
                                         endcase
                                         end
@@ -142,7 +204,7 @@ class alu_reference_model;
                                         ref_trans = temp_trans;
                                         if (ref_trans.INP_VALID == 2'b11) begin
                                                 got_input = 1;
-                                                $display("got 11 at j= %0d",j);
+                                                $display("got both at j= %0d",j);
                                                         break;
                                         end
                                 end
@@ -196,7 +258,16 @@ class alu_reference_model;
                                                 ref_trans.RES = (ref_trans.OPA << 1) * ref_trans.OPB ;
                                                 end
 
-                                                default: reset_outputs();
+                                                //default: reset_outputs();
+                                                default: begin //reset_outputs();
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+                                                end
                                         endcase
                                         end
                                         end
@@ -223,7 +294,16 @@ class alu_reference_model;
                                                                 ref_trans.RES = {1'b0, (ref_trans.OPA >> amount) | (ref_trans.OPA << (`width - amount))};
                                                         ref_trans.ERR = (`width > 3 && |ref_trans.OPB[`width-1:3]) ? 1'b1 : 1'b0;
                                                 end
-                                                default: reset_outputs();
+                                                //default: reset_outputs();
+                                                default: begin //reset_outputs();
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+                                                end
                                         endcase
                                         end
                                         end
@@ -232,7 +312,16 @@ class alu_reference_model;
 
                         end
                         else if(ref_trans.INP_VALID == 2'b00)begin
-                                reset_outputs();
+                                //reset_outputs();
+
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+
                         end
 
 
@@ -296,7 +385,16 @@ class alu_reference_model;
                                                 ref_trans.RES = (ref_trans.OPA << 1) * ref_trans.OPB ;
                                                 end
 
-                                                default: reset_outputs();
+                                                //default: reset_outputs();
+                                                default: begin //reset_outputs();
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+                                                end
                                         endcase
                                         end
                                         end
@@ -323,7 +421,16 @@ class alu_reference_model;
                                                                 ref_trans.RES = {1'b0, (ref_trans.OPA >> amount) | (ref_trans.OPA << (`width - amount))};
                                                         ref_trans.ERR = (`width > 3 && |ref_trans.OPB[`width-1:3]) ? 1'b1 : 1'b0;
                                                 end
-                                                default: reset_outputs();
+                                                //default: reset_outputs();
+                                                default: begin //reset_outputs();
+                                                        ref_trans.RES   = 0;
+                                                        ref_trans.COUT  = 0;
+                                                        ref_trans.OFLOW = 0;
+                                                        ref_trans.E     = 0;
+                                                        ref_trans.G     = 0;
+                                                        ref_trans.L     = 0;
+                                                        ref_trans.ERR   = 0;
+                                                end
                                         endcase
                                         end
                                         end
@@ -334,11 +441,16 @@ class alu_reference_model;
         end
 
                 repeat(1) @(posedge vif.CLK);//#%^&&@*(
+                /*if (ref_trans.CE && ref_trans.INP_VALID != 2'b00) begin
+                        mbx_rs.put(ref_trans);
+                        valid_txns++;
+                        valid_count++;
+                end
+                $display("REFERENCE MODEL: valid transactions sent = %0d", valid_count);*/
+                mbx_rs.put(ref_trans);
 
-                 mbx_rs.put(ref_trans);
-
-                 $display("time[%0t] REFERENCE PASSING THE DATA TO SCOREBOARD RES=%0d, COUT=%0d, OFLOW=%0d, ERR=%0b, E=%0b, G=%0b, L=%0b",$time,ref_trans.RES,ref_trans.COUT,ref_trans.OFLOW,ref_trans.ERR,ref_trans.E,ref_trans.G,ref_trans.L);
+                 $display("time[%0t]  |%0d| REFERENCE PASSING THE DATA TO SCOREBOARD RES=%0d, COUT=%0d, OFLOW=%0d, ERR=%0b, E=%0b, G=%0b, L=%0b",$time,i,ref_trans.RES,ref_trans.COUT,ref_trans.OFLOW,ref_trans.ERR,ref_trans.E,ref_trans.G,ref_trans.L);
                 end
                 $display("ref task done");
         endtask
-endclass
+endclass                                                                                                                                                                                                      
