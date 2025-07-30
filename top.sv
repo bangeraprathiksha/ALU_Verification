@@ -1,5 +1,6 @@
-`include "alu_if.sv"
+
 `include "alu_pkg.sv"
+`include "alu_if.sv"
 `include "alu.v"
 
 module top();
@@ -14,9 +15,9 @@ module top();
 
     // Reset generation
     initial begin
-        RST = 0;
-        repeat(5) @(posedge CLK); // Hold reset for 2 cycles
         RST = 1;
+        repeat(1) @(posedge CLK); // Hold reset for 2 cycles
+        RST = 0;
     end
 
     // Instantiate interface
@@ -42,8 +43,17 @@ module top();
         .RST        (RST)
     );
 
-    // Instantiate test
-    alu_test tb = new(intrf.DRV, intrf.MON, intrf.REF_SB);
+
+
+
+    //Instantiating the Test
+    alu_test tb= new(intrf.DRV,intrf.MON,intrf.REF_SB);
+    test1 tb1= new(intrf.DRV,intrf.MON, intrf.REF_SB);
+    test2 tb2= new(intrf.DRV,intrf.MON, intrf.REF_SB);
+    test3 tb3= new(intrf.DRV,intrf.MON, intrf.REF_SB);
+    test4 tb4= new(intrf.DRV,intrf.MON, intrf.REF_SB);
+    test_regression tb_regression= new(intrf.DRV,intrf.MON,intrf.REF_SB);
+
 
     // Print DUT inputs every cycle (when CE and INP_VALID are high)
    /*always @(posedge CLK) begin
@@ -62,7 +72,12 @@ module top();
     // Start test
     initial begin
         tb.run();
-        #2000;
+        tb1.run();
+        tb2.run();
+        tb3.run();
+        tb4.run();
+        tb_regression.run();
+        #1500;
         $finish();
     end
 
